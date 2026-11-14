@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "64665625211",
+    "project_id": "important-7e9ce",
+    "storage_bucket": "important-7e9ce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64665625211:android:478da88d99afab115e38de",
+        "android_client_info": {
+          "package_name": "com.lawyerdiary.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCju-jWxYZ88jNxjVJ6I2bQLHiTu9KGqPw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
