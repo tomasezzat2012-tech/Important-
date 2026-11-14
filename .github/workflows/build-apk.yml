@@ -48,7 +48,8 @@ jobs:
       - name: Show compile errors
         if: failure()
         working-directory: project
-        run: grep -E "^e: |error:|What went wrong" -A2 build.log | head -80
+        run: |
+          grep -E "^e: " build.log | head -60 || true
 
       - name: Rename APK
         run: cp project/app/build/outputs/apk/release/app-release.apk LawyerDiary.apk
