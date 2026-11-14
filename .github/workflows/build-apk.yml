@@ -33,33 +33,4 @@ jobs:
       - name: Unpack project from ZIP
         run: |
           unzip -q LawyerDiary-Android-Source.zip -d project
-          GS=$(find . -path ./project -prune -o -iname 'google-services*' -type f -print | head -1)
-          echo "Found: $GS"
-          if [ -z "$GS" ]; then
-            echo "::error::google-services.json not found in the repo."
-            exit 1
-          fi
-          cp "$GS" project/app/google-services.json
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      - name: Build release APK
-        working-directory: project
-        run: gradle assembleRelease --stacktrace
-
-      - name: Rename APK
-        run: cp project/app/build/outputs/apk/release/app-release.apk LawyerDiary.apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: LawyerDiary-apk
-          path: LawyerDiary.apk
-
-      - name: Publish release (download link)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.run_number }}
-          name: مفكرة المحامي v${{ github.run_number }}
-          files: LawyerDiary.apk
+          GS=$(find . -path ./project -prune -o -iname 'google-services*' -type f
