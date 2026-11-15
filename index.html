@@ -88,6 +88,17 @@ h2.in::after{width:84px}
 .car{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 2px 16px;-webkit-overflow-scrolling:touch}
 .car img{height:460px;border-radius:20px;border:1px solid var(--line);scroll-snap-align:center;flex:0 0 auto}
 
+
+
+/* التحديثات */
+.upd{max-width:640px;margin:0 auto;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 22px}
+.upd .ver{font-size:1.5rem;font-weight:900;color:var(--gold2)}
+.upd .when{color:var(--muted);font-size:.9rem;margin-bottom:6px}
+.upd pre{white-space:pre-wrap;font:inherit;color:var(--ink);background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:right;font-size:.95rem}
+.upd .msg{min-height:1.6em;margin:10px 0;color:var(--muted)}
+.upd .msg.ok{color:#6fd6a0}.upd .msg.err{color:#ff8a8a}
+.btn[disabled]{opacity:.6;cursor:wait}
+
 /* دعم */
 .cta{text-align:center;background:linear-gradient(135deg,rgba(201,162,75,.16),rgba(60,110,200,.12));border:1px solid rgba(201,162,75,.3);border-radius:24px;padding:40px 22px}
 .cta h2{font-size:1.6rem}
@@ -176,6 +187,23 @@ footer a{color:var(--gold2)}
   </div>
 </section>
 
+<section id="updates">
+  <div class="wrap">
+    <h2 class="reveal">التحديثات</h2>
+    <p class="sub reveal">اضغط للتأكد إن عندك آخر إصدار، ولو فيه أحدث حمّله وثبّته فوق القديم.</p>
+    <div class="upd reveal">
+      <div class="when" id="updWhen">آخر إصدار</div>
+      <div class="ver" id="updVer">—</div>
+      <pre id="updNotes" hidden></pre>
+      <div class="msg" id="updMsg"></div>
+      <div class="btns">
+        <button class="btn ghost" id="updBtn" type="button">تحقق من التحديثات</button>
+        <a class="btn primary" id="updDl" href="#" hidden>تحميل آخر إصدار</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <div class="cta reveal">
@@ -217,6 +245,35 @@ if ('IntersectionObserver' in window) {
   }, { threshold: .15, rootMargin: '0px 0px -40px 0px' });
   els.forEach(function (e) { io.observe(e); });
 } else { els.forEach(function (e) { e.classList.add('in'); }); }
+
+
+/* التحقق من التحديثات (من آخر Release على GitHub) */
+var REPO = 'tomasezzat2012-tech/Important-';
+function fmtDate(d){ try { return new Date(d).toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return ''; } }
+function checkUpdates(manual){
+  var btn=document.getElementById('updBtn'), msg=document.getElementById('updMsg');
+  btn.disabled=true; btn.textContent='جاري التحقق...'; msg.className='msg'; msg.textContent='';
+  fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{'Accept':'application/vnd.github+json'},cache:'no-store'})
+    .then(function(r){ if(r.status===404) throw new Error('none'); if(!r.ok) throw new Error('http'); return r.json(); })
+    .then(function(rel){
+      var name=(rel.name||rel.tag_name||'').replace('مفكرة المحامي','').trim();
+      document.getElementById('updVer').textContent='الإصدار '+(name||rel.tag_name);
+      document.getElementById('updWhen').textContent='آخر تحديث: '+fmtDate(rel.published_at);
+      var n=document.getElementById('updNotes');
+      if(rel.body&&rel.body.trim()){ n.textContent=rel.body.trim(); n.hidden=false; } else { n.hidden=true; }
+      var apk=(rel.assets||[]).filter(function(a){return /\.apk$/i.test(a.name);})[0];
+      var dl=document.getElementById('updDl');
+      if(apk){ dl.href=apk.browser_download_url; dl.hidden=false; document.getElementById('dl').href=apk.browser_download_url; }
+      msg.className='msg ok'; msg.textContent=manual?'تم التحقق: ده آخر إصدار متاح.':'';
+    })
+    .catch(function(e){
+      msg.className='msg err';
+      msg.textContent=(e.message==='none')?'لسه مفيش إصدار منشور.':'تعذر التحقق دلوقتي، جرّب بعد شوية.';
+    })
+    .then(function(){ btn.disabled=false; btn.textContent='تحقق من التحديثات'; });
+}
+document.getElementById('updBtn').addEventListener('click',function(){ checkUpdates(true); });
+checkUpdates(false);
 </script>
 </body>
 </html>
