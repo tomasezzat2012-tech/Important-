@@ -43,7 +43,7 @@ jobs:
         working-directory: project
         run: |
           set -o pipefail
-          gradle assembleRelease --console=plain 2>&1 | tee build.log
+          gradle assembleRelease -Pvc=${{ github.run_number }} -Pvn=1.${{ github.run_number }} --console=plain 2>&1 | tee build.log
 
       - name: Show compile errors
         if: failure()
@@ -51,8 +51,16 @@ jobs:
         run: |
           grep -E "^e: " build.log | head -60 || true
 
-      - name: Rename APK
-        run: cp project/app/build/outputs/apk/release/app-release.apk LawyerDiary.apk
+      - name: Prepare release files
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+          REPO: ${{ github.repository }}
+        run: |
+          cp project/app/build/outputs/apk/release/app-release.apk LawyerDiary.apk
+          if [ -z "$MSG" ]; then MSG="تحديث جديد"; fi
+          printf '%s' "$MSG" > notes.txt
+          jq -n --argjson vc "${{ github.run_number }}" --arg vn "1.${{ github.run_number }}" --arg apk "https://github.com/$REPO/releases/latest/download/LawyerDiary.apk" --rawfile notes notes.txt '{versionCode:$vc,versionName:$vn,apk:$apk,notes:$notes}' > version.json
+          cat version.json
 
       - uses: actions/upload-artifact@v4
         with:
@@ -63,5 +71,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: مفكرة المحامي v${{ github.run_number }}
-          files: LawyerDiary.apk
+          name: مفكرة المحامي 1.${{ github.run_number }}
+          body_path: notes.txt
+          files: |
+            LawyerDiary.apk
+            version.json
